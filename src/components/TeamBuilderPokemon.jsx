@@ -1,8 +1,8 @@
 import React from 'react';
 
-import PokemonService from '../services/PokemonService';
 import "../../src/styles.css";
 import axios from 'axios';
+import Move from './Move';
 
 
 const POKE_API_POKE_BASE_URL = "https://pokeapi.co/api/v2/pokemon/";
@@ -11,15 +11,19 @@ class TeamBuilderPokemon extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            moveList: [],
             pokemonList: [],
             pokeListVis: false,
+            moveListVis: false,
+            editingMove: 0
         };
         this.toggleSelect = this.toggleSelect.bind(this);
         this.setPokemon = this.setPokemon.bind(this);
+        this.editMove = this.editMove.bind(this);
+        this.setMove = this.setMove.bind(this);
     }
 
     toggleSelect = () => {
-        console.log("clicked");
         this.state.pokeListVis ? this.setState({ pokeListVis: false }) : this.setState({ pokeListVis: true })
     }
 
@@ -55,7 +59,7 @@ class TeamBuilderPokemon extends React.Component {
                 specialAttack: this.calcStat(res.data.stats[3].base_stat),
                 specialDefense: this.calcStat(res.data.stats[4].base_stat),
                 speed: this.calcStat(res.data.stats[5].base_stat),
-                moves: []
+                moves: ["Move 1", "Move 2", "Move 3", "Move 4"]
             };
             if (res.data.types[1]) {
                 pokemon.type2 = this.capitalizeFirstLetter(res.data.types[1].type.name)
@@ -63,6 +67,7 @@ class TeamBuilderPokemon extends React.Component {
             else {
                 pokemon.type2 = ""
             }
+            this.setState({ moveList: res.data.moves });
             this.props.setPoke(pokemon);
         })
         this.setState({ pokeListVis: false })
@@ -76,6 +81,24 @@ class TeamBuilderPokemon extends React.Component {
         console.log(this.props)
     }
 
+    editMove(id) {
+        this.setState({ editingMove: id.target.id })
+        this.state.moveListVis ? this.setState({ moveListVis: false }) : this.setState({ moveListVis: true })
+    }
+
+    setMove(move) {
+        if (this.state.moveListVis) {
+            this.setState({ moveListVis: false })
+        }
+        let moves = [this.props.pokemon.moves][0];
+        console.log(moves)
+        moves.splice((this.state.editingMove) - 1, 1, this.capitalizeFirstLetter(move));
+        let pokemon = this.props.pokemon;
+        pokemon.moves = moves;
+        this.props.setPoke(pokemon);
+
+
+    }
 
     render() {
 
@@ -123,12 +146,12 @@ class TeamBuilderPokemon extends React.Component {
                         </div>
                         <div className="moves">
                             <div className="moveBlock">
-                                <div className="move">Move 1</div>
-                                <div className="move">Move 2</div>
+                                <div className="move" id={1} onClick={this.editMove}>{this.props.pokemon.moves[0]}</div>
+                                <div className="move" id={2} onClick={this.editMove}>{this.props.pokemon.moves[1]}</div>
                             </div>
                             <div className="moveBlock">
-                                <div className="move">Move 3</div>
-                                <div className="move">Move 4</div>
+                                <div className="move" id={3} onClick={this.editMove}>{this.props.pokemon.moves[2]}</div>
+                                <div className="move" id={4} onClick={this.editMove}>{this.props.pokemon.moves[3]}</div>
                             </div>
                         </div>
                     </div>
@@ -145,6 +168,17 @@ class TeamBuilderPokemon extends React.Component {
                         )
                     }
                 </div>
+
+                <div className="moveSelect" style={{ display: this.state.moveListVis ? 'block' : 'none' }}>
+                    {
+                        this.state.moveList.map(
+                            move =>
+                                <Move move={move} setMove={this.setMove} />
+
+                        )
+                    }
+                </div>
+
             </div>
         )
     }

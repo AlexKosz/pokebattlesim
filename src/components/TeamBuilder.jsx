@@ -1,7 +1,6 @@
 import React from 'react';
 import TeamBuilderPokemon from './TeamBuilderPokemon';
 
-
 const pokeTemplate = {
     moveList: [],
     id: 0,
@@ -14,7 +13,7 @@ const pokeTemplate = {
     specialAttack: 0,
     specialDefense: 0,
     speed: 0,
-    moves: []
+    moves: ["Move 1", "Move 2", "Move 3", "Move 4"]
 };
 
 class TeamBuilder extends React.Component {
