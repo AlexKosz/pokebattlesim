@@ -7,6 +7,11 @@ import Move from './Move';
 
 const POKE_API_POKE_BASE_URL = "https://pokeapi.co/api/v2/pokemon/";
 
+
+const moveTemplate = {
+    name: "test",
+};
+
 class TeamBuilderPokemon extends React.Component {
     constructor(props) {
         super(props);
@@ -43,6 +48,8 @@ class TeamBuilderPokemon extends React.Component {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
+
+
     setPokemon = (id) => {
         id = id.pokemon
         let url = POKE_API_POKE_BASE_URL + id;
@@ -59,7 +66,7 @@ class TeamBuilderPokemon extends React.Component {
                 specialAttack: this.calcStat(res.data.stats[3].base_stat),
                 specialDefense: this.calcStat(res.data.stats[4].base_stat),
                 speed: this.calcStat(res.data.stats[5].base_stat),
-                moves: ["Move 1", "Move 2", "Move 3", "Move 4"]
+                moves: [moveTemplate, moveTemplate, moveTemplate, moveTemplate]
             };
             if (res.data.types[1]) {
                 pokemon.type2 = this.capitalizeFirstLetter(res.data.types[1].type.name)
@@ -77,8 +84,7 @@ class TeamBuilderPokemon extends React.Component {
         let tempArr = [...Array(494).keys()]
         tempArr.shift()
         this.setState({ pokemonList: tempArr })
-        console.log(this.state.pokemonList)
-        console.log(this.props)
+
     }
 
     editMove(id) {
@@ -90,10 +96,11 @@ class TeamBuilderPokemon extends React.Component {
         if (this.state.moveListVis) {
             this.setState({ moveListVis: false })
         }
+        move.name = this.capitalizeFirstLetter(move.name);
         let moves = [this.props.pokemon.moves][0];
-        console.log(moves)
-        moves.splice((this.state.editingMove) - 1, 1, this.capitalizeFirstLetter(move));
+        moves.splice((this.state.editingMove) - 1, 1, move);
         let pokemon = this.props.pokemon;
+        console.log(moves)
         pokemon.moves = moves;
         this.props.setPoke(pokemon);
 
@@ -146,12 +153,12 @@ class TeamBuilderPokemon extends React.Component {
                         </div>
                         <div className="moves">
                             <div className="moveBlock">
-                                <div className="move" id={1} onClick={this.editMove}>{this.props.pokemon.moves[0]}</div>
-                                <div className="move" id={2} onClick={this.editMove}>{this.props.pokemon.moves[1]}</div>
+                                <div className="move" id={1} onClick={this.editMove}>{this.props.pokemon.moves[0].name}</div>
+                                <div className="move" id={2} onClick={this.editMove}>{this.props.pokemon.moves[1].name}</div>
                             </div>
                             <div className="moveBlock">
-                                <div className="move" id={3} onClick={this.editMove}>{this.props.pokemon.moves[2]}</div>
-                                <div className="move" id={4} onClick={this.editMove}>{this.props.pokemon.moves[3]}</div>
+                                <div className="move" id={3} onClick={this.editMove}>{this.props.pokemon.moves[2].name}</div>
+                                <div className="move" id={4} onClick={this.editMove}>{this.props.pokemon.moves[3].name}</div>
                             </div>
                         </div>
                     </div>
