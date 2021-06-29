@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  background-color: #111;
 }
 
 .App-logo {
@@ -36,3 +37,13 @@
     transform: rotate(360deg);
   }
 }
+
+.card-horizontal {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+.info{
+  display: inline-block;
+}
+
