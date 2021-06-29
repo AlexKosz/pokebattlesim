@@ -8,25 +8,11 @@ import axios from 'axios';
 const POKE_API_POKE_BASE_URL = "https://pokeapi.co/api/v2/pokemon/";
 
 class TeamBuilderPokemon extends React.Component {
-
-
-
     constructor(props) {
         super(props);
         this.state = {
-            moveList: [],
             pokemonList: [],
             pokeListVis: false,
-            id: 0,
-            name: "Select a pokemon",
-            type1: "Test1",
-            type2: "Test2",
-            hp: 0,
-            attack: 0,
-            defense: 0,
-            specialAttack: 0,
-            specialDefense: 0,
-            speed: 0
         };
         this.toggleSelect = this.toggleSelect.bind(this);
         this.setPokemon = this.setPokemon.bind(this);
@@ -56,26 +42,30 @@ class TeamBuilderPokemon extends React.Component {
     setPokemon = (id) => {
         id = id.pokemon
         let url = POKE_API_POKE_BASE_URL + id;
+        let pokemon = {};
         axios.get(url).then((res) => {
-            this.setState({ id: id });
-            this.setState({ name: this.capitalizeFirstLetter(res.data.name) });
-            this.setState({ type1: this.capitalizeFirstLetter(res.data.types[0].type.name) });
+            pokemon = {
+                moveList: res.data.moves,
+                id: id,
+                name: this.capitalizeFirstLetter(res.data.name),
+                type1: this.capitalizeFirstLetter(res.data.types[0].type.name),
+                hp: this.calcHp(res.data.stats[0].base_stat),
+                attack: this.calcStat(res.data.stats[1].base_stat),
+                defense: this.calcStat(res.data.stats[2].base_stat),
+                specialAttack: this.calcStat(res.data.stats[3].base_stat),
+                specialDefense: this.calcStat(res.data.stats[4].base_stat),
+                speed: this.calcStat(res.data.stats[5].base_stat),
+                moves: []
+            };
             if (res.data.types[1]) {
-                this.setState({ type2: this.capitalizeFirstLetter(res.data.types[1].type.name) });
+                pokemon.type2 = this.capitalizeFirstLetter(res.data.types[1].type.name)
             }
             else {
-                this.setState({ type2: "" });
+                pokemon.type2 = ""
             }
-            this.setState({ hp: this.calcHp(res.data.stats[0].base_stat) });
-            this.setState({ attack: this.calcStat(res.data.stats[1].base_stat) });
-            this.setState({ defense: this.calcStat(res.data.stats[2].base_stat) });
-            this.setState({ specialAttack: this.calcStat(res.data.stats[3].base_stat) });
-            this.setState({ specialDefense: this.calcStat(res.data.stats[4].base_stat) });
-            this.setState({ speed: this.calcStat(res.data.stats[5].base_stat) });
-            this.setState({ moveList: res.data.moves });
+            this.props.setPoke(pokemon);
         })
         this.setState({ pokeListVis: false })
-
     }
 
     componentDidMount() {
@@ -83,6 +73,7 @@ class TeamBuilderPokemon extends React.Component {
         tempArr.shift()
         this.setState({ pokemonList: tempArr })
         console.log(this.state.pokemonList)
+        console.log(this.props)
     }
 
 
@@ -93,39 +84,39 @@ class TeamBuilderPokemon extends React.Component {
             <div>
                 <div className="wrapper">
                     <div className="pokepickcard">
-                        <img src={`/assets/sprites/pokemon/front/${this.state.id}.png`} alt="pokemon 11" onClick={this.toggleSelect} />
+                        <img src={`/assets/sprites/pokemon/front/${this.props.pokemon.id}.png`} alt="pokemon 11" onClick={this.toggleSelect} />
                         <div className="info">
                             <div className="stats">
                                 <div className="statRow">
                                     <div className="stat">
-                                        <p><strong>{this.state.name}</strong></p>
+                                        <p><strong>{this.props.pokemon.name}</strong></p>
                                     </div>
                                     <div className="stat">
-                                        <p><strong>{this.state.type1}</strong></p>
-                                        <p><strong>{this.state.type2}</strong></p>
+                                        <p><strong>{this.props.pokemon.type1}</strong></p>
+                                        <p><strong>{this.props.pokemon.type2}</strong></p>
                                     </div>
                                 </div>
                                 <div className="statRow">
                                     <div className="stat">
-                                        <p><strong>Hp:</strong> {this.state.hp}</p>
+                                        <p><strong>Hp:</strong> {this.props.pokemon.hp}</p>
                                     </div>
                                     <div className="stat">
-                                        <p><strong>Attack:</strong> {this.state.attack}</p>
+                                        <p><strong>Attack:</strong> {this.props.pokemon.attack}</p>
                                     </div>
                                     <div className="stat">
-                                        <p><strong>Defense:</strong> {this.state.defense}</p>
+                                        <p><strong>Defense:</strong> {this.props.pokemon.defense}</p>
                                     </div>
                                 </div>
 
                                 <div className="statRow">
                                     <div className="stat">
-                                        <p><strong>Special Attack:</strong> {this.state.specialAttack}</p>
+                                        <p><strong>Special Attack:</strong> {this.props.pokemon.specialAttack}</p>
                                     </div>
                                     <div className="stat">
-                                        <p><strong>Special Defense:</strong> {this.state.specialDefense}</p>
+                                        <p><strong>Special Defense:</strong> {this.props.pokemon.specialDefense}</p>
                                     </div>
                                     <div className="stat">
-                                        <p><strong>Speed:</strong> {this.state.speed}</p>
+                                        <p><strong>Speed:</strong> {this.props.pokemon.speed}</p>
                                     </div>
                                 </div>
                             </div>
