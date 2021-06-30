@@ -84,7 +84,6 @@ class TeamBuilderPokemon extends React.Component {
         let tempArr = [...Array(494).keys()]
         tempArr.shift()
         this.setState({ pokemonList: tempArr })
-
     }
 
     editMove(id) {
