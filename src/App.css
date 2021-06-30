@@ -2,19 +2,8 @@
   text-align: center;
   background-color: #111;
   padding: 15px;
+  min-height: 100vh;
 }
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-
-
-
-
-
-
 
 .info{
   display: inline-block;

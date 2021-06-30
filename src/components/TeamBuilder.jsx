@@ -2,6 +2,7 @@ import React from 'react';
 import TeamBuilderPokemon from './TeamBuilderPokemon';
 import "../../src/styles.css";
 import axios from 'axios';
+import { Redirect } from 'react-router-dom';
 const pokeTemplate = {
     moveList: [],
     id: 0,
@@ -15,6 +16,7 @@ const pokeTemplate = {
     specialDefense: 0,
     speed: 0,
     moves: ["Move 1", "Move 2", "Move 3", "Move 4"],
+    speciesId: 0
 
 };
 
@@ -31,7 +33,8 @@ class TeamBuilder extends React.Component {
             trainerSprite: 0,
             name: "",
             trainerListVis: false,
-            trainerList: []
+            trainerList: [],
+            redirect: false
         };
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -42,20 +45,21 @@ class TeamBuilder extends React.Component {
     }
 
     handleSubmit(event) {
-        const teamAddUrl = "http://localhost:8084/api/v1/addTeam"
-        const pokeAddUrl = "http://localhost:8084/api/v1/addPokemon"
+        // const teamAddUrl = "http://localhost:8084/api/v1/addTeam"
+        // const pokeAddUrl = "http://localhost:8084/api/v1/addPokemon"
 
-        let team = {
-            name: this.state.name,
-            trainerSprite: this.state.trainerSprite
-        }
-        axios.post(teamAddUrl, team).then(res => {
-        });
-
-        axios.post(pokeAddUrl, this.stateToDB(this.state.pokemon1)).then(res => {
-            alert(res);
-        });
-
+        // let team = {
+        //     name: this.state.name,
+        //     trainerSprite: this.state.trainerSprite
+        // }
+        // axios.post(teamAddUrl, team).then(res => { });
+        // axios.post(pokeAddUrl, this.stateToDB(this.state.pokemon1)).then(res => { });
+        // axios.post(pokeAddUrl, this.stateToDB(this.state.pokemon2)).then(res => { });
+        // axios.post(pokeAddUrl, this.stateToDB(this.state.pokemon3)).then(res => { });
+        // axios.post(pokeAddUrl, this.stateToDB(this.state.pokemon4)).then(res => { });
+        // axios.post(pokeAddUrl, this.stateToDB(this.state.pokemon5)).then(res => { });
+        // axios.post(pokeAddUrl, this.stateToDB(this.state.pokemon6)).then(res => { });
+        this.setState({ redirect: true });
     }
 
     stateToDB(pokemon) {
@@ -71,7 +75,8 @@ class TeamBuilder extends React.Component {
             move1: pokemon.moves[0].name,
             move2: pokemon.moves[1].name,
             move3: pokemon.moves[2].name,
-            move4: pokemon.moves[3].name
+            move4: pokemon.moves[3].name,
+            speciesId: pokemon.speciesId
         }
         if (pokemon.type2) {
             pokemon2.type2 = pokemon.type2;
@@ -117,6 +122,9 @@ class TeamBuilder extends React.Component {
     }
 
     render() {
+        if (this.state.redirect) {
+            return <Redirect to="/battle" />
+        }
         return (
             <div>
                 <form onSubmit={this.handleSubmit}>
