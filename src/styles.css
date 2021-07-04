@@ -227,3 +227,41 @@
   .loaded{
       color: #fff;
   }
+
+  .battleCard{
+    display: flex;
+    height: 200px;
+    width: 33vw;
+    align-items: center;
+  }
+
+  .battleCardImg{
+      width: 100%;
+  }
+
+  .battleCardImg img{
+      height: 150px;
+
+  }
+
+  .battleCardInfo{
+      width: 75%;
+  }
+
+
+  .enemy{
+      position: relative;
+      right:0;
+  }
+
+  #user{
+      position: relative;
+      left: 0;
+  }
+
+.wrapper3{
+    display: flex;
+    flex-wrap: wrap;
+align-items: center;
+justify-content: center;
+}

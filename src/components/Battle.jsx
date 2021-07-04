@@ -4,7 +4,6 @@ import TrainerCard from './TrainerCard';
 import Battler from './Battler';
 
 
-//Damage = ((((2 * Level / 5 + 2) * AttackStat * AttackPower / DefenseStat) / 50) + 2) * STAB * Weakness/Resistance * RandomNumber / 100 for later
 
 class Battle extends React.Component {
     constructor(props) {
@@ -82,11 +81,11 @@ class Battle extends React.Component {
             if (!this.state.battleStarted) {
                 return (
                     <div className="loaded">
-                        <div className="trainerCardBattle">
+                        <div className="trainerCardBattleUser">
                             <TrainerCard trainer={this.state.userTeam} pokemon={this.state.userPokemon} />
                         </div>
                         <h1>VS</h1>
-                        <div className="trainerCardBattle">
+                        <div className="trainerCardBattleEnemy">
                             <TrainerCard trainer={this.state.enemyTeam} pokemon={this.state.enemyPokemon} />
                         </div>
                         <h1 className="clickable" onClick={this.beginBattle}>Click here to begin battle!</h1>
@@ -97,7 +96,7 @@ class Battle extends React.Component {
             else {
                 return (
                     <div className="battle">
-                        <h1>Insert Battle here</h1>
+                        <Battler userTeam={this.state.userTeam} userPokemon={this.state.userPokemon} enemyTeam={this.state.enemyTeam} enemyPokemon={this.state.enemyPokemon} />
                     </div>
                 );
             }

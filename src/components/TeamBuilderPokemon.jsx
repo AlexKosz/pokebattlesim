@@ -66,7 +66,8 @@ class TeamBuilderPokemon extends React.Component {
                 specialAttack: this.calcStat(res.data.stats[3].base_stat),
                 specialDefense: this.calcStat(res.data.stats[4].base_stat),
                 speed: this.calcStat(res.data.stats[5].base_stat),
-                moves: [moveTemplate, moveTemplate, moveTemplate, moveTemplate]
+                moves: [moveTemplate, moveTemplate, moveTemplate, moveTemplate],
+                speciesId: id
             };
             if (res.data.types[1]) {
                 pokemon.type2 = this.capitalizeFirstLetter(res.data.types[1].type.name)

@@ -1,8 +1,6 @@
 
 import './App.css';
-
 import React from 'react';
-import MainComponent from './components/MainComponent';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import TeamBuilder from './components/TeamBuilder';
 import Battle from './components/Battle';
@@ -22,7 +20,7 @@ function App() {
             <Battle />
           </Route>
           <Route path="/">
-            <h1>Test</h1>
+            <h1 style={{ color: "white" }}>Home page</h1>
           </Route>
         </Switch>
 
