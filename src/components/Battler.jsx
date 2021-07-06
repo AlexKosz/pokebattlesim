@@ -11,7 +11,7 @@ class Battler extends React.Component {
         super(props);
 
         this.state = {
-            messages: ["1", "2", "3", "4"],
+            messages: ["", "", "", ""],
             turn: 0,
             winner: null,
             userTeam: {},
@@ -47,6 +47,7 @@ class Battler extends React.Component {
         this.userUseMove = this.userUseMove.bind(this);
         this.handleTurnBattle = this.handleTurnBattle.bind(this);
         this.handleTurnSwitch = this.handleTurnSwitch.bind(this);
+        this.handleMessages = this.handleMessages.bind(this);
     }
 
     initSwitch() {
@@ -58,6 +59,13 @@ class Battler extends React.Component {
         this.setState({ isLoading: true })
     }
 
+
+    handleMessages(newMessage) {
+        let messages = this.state.messages;
+        messages.shift();
+        messages.push(newMessage)
+        this.setState({ messages: messages })
+    }
 
     handleFirstTurn() {
         let cynthFirstPoke = Math.floor(Math.random() * (this.state.enemyPokemon.length));
@@ -114,15 +122,20 @@ class Battler extends React.Component {
     userUseMove(slot) {
         switch (slot) {
             case 1:
+                this.handleMessages(`You selected ${this.state.userMove1.name}`)
                 this.handleTurnBattle(this.calculateDamage(this.state.userCurrentPokemon, this.state.userMove1, this.state.enemyCurrentPokemon))
+
                 break;
             case 2:
+                this.handleMessages(`You used ${this.state.userMove2.name}`)
                 this.handleTurnBattle(this.calculateDamage(this.state.userCurrentPokemon, this.state.userMove2, this.state.enemyCurrentPokemon))
                 break;
             case 3:
+                this.handleMessages(`You used ${this.state.userMove3.name}`)
                 this.handleTurnBattle(this.calculateDamage(this.state.userCurrentPokemon, this.state.userMove3, this.state.enemyCurrentPokemon))
                 break;
             case 4:
+                this.handleMessages(`You used ${this.state.userMove4.name}`)
                 this.handleTurnBattle(this.calculateDamage(this.state.userCurrentPokemon, this.state.userMove3, this.state.enemyCurrentPokemon))
                 break;
             default:
@@ -224,6 +237,8 @@ class Battler extends React.Component {
                 highestDamageMove = i;
             }
         }
+        this.handleMessages(`Cynthia used ${moves[highestDamageMove].name}`)
+        this.handleMessages(`She did ${highestDamage} damage`)
         console.log("done with calcs highest move is " + moves[highestDamageMove].name + " with " + highestDamage)
         this.useMove(true, highestDamage)
 
@@ -234,27 +249,37 @@ class Battler extends React.Component {
 
 
     handleTurnSwitch() {
+
         this.setState({ isLoading: true })
         if (this.state.switching === true) {
             this.setState({ switching: false })
         }
         this.setState({ turn: this.state.turn + 1 })
+
     }
 
     handleTurnBattle(damage) {
         this.setState({ isLoading: true })
         if (this.state.enemyCurrentPokemon.speed > this.state.userCurrentPokemon.speed) {
             this.cynthSelectMove()
-            console.log(this.state.userCurrentPokemon.hp > 0)
+            this.handleMessages(`She was faster but you did ${damage} damage`)
             if (this.state.userCurrentPokemon.hp > 0) {
                 this.useMove(false, damage)
+            }
+            else {
+                this.handleMessages(`Your pokemon fainted.`)
             }
         }
         else {
             this.useMove(false, damage)
+            this.handleMessages(`You were faster and did ${damage} damage`)
             console.log(this.state.enemyCurrentPokemon.hp > 0)
             if (this.state.enemyCurrentPokemon.hp > 0) {
                 this.cynthSelectMove()
+
+            }
+            else {
+                this.handleMessages(`Her pokemon fainted!`)
             }
         }
 
@@ -295,6 +320,7 @@ class Battler extends React.Component {
         this.setState({ switchOccured: true })
         this.getUserMoveData(newCurrent);
         this.handleTurnSwitch();
+        this.handleMessages(`You sent out ${newCurrent.name}!`)
     }
 
     getUserMoveData(pkmn) {
@@ -345,6 +371,7 @@ class Battler extends React.Component {
             this.setState({ enemyCurrentPokemon: newCurrent })
             this.setState({ enemyPokemon: array })
             this.getEnemyMoveData(newCurrent)
+            this.handleMessages(`She send out ${newCurrent.name}`)
         }
         else {
             alert("Congratulations! You won against cynthia. Your team will now be added to the hall of fame. Think you can do it with another team?")
