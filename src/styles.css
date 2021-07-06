@@ -265,3 +265,22 @@
 align-items: center;
 justify-content: center;
 }
+
+.home{
+    color: #fff;
+    width: 75vw;
+    margin: auto;
+}
+
+.link{
+    color: rgb(226, 255, 97);
+}
+
+.wrapper4{
+    display: flex;
+}
+
+.wrapper4 img{
+    height: 100%;
+    width: 500px;
+}

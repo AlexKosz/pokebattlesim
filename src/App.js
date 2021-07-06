@@ -3,6 +3,7 @@ import './App.css';
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import TeamBuilder from './components/TeamBuilder';
+import Home from './components/Home';
 import Battle from './components/Battle';
 
 function App() {
@@ -20,7 +21,7 @@ function App() {
             <Battle />
           </Route>
           <Route path="/">
-            <h1 style={{ color: "white" }}>Home page</h1>
+            <Home />
           </Route>
         </Switch>
 

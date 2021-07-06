@@ -116,7 +116,7 @@ class TeamBuilder extends React.Component {
 
 
     componentDidMount() {
-        let tempArr = [...Array(19).keys()]
+        let tempArr = [...Array(18).keys()]
         tempArr.shift()
         this.setState({ trainerList: tempArr })
     }
