@@ -68,10 +68,10 @@ class Battle extends React.Component {
     handleVictory() {
         console.log("teststing");
         this.setState({ victorious: true })
-        // let setVictoriousUrl = `http://localhost:8084/api/v1/team/victorious/${this.state.userTeamId}`
-        // axios.post(setVictoriousUrl).then(res => {
-
-        // });
+        let team = this.state.userTeam;
+        team.victorious = 1;
+        const teamAddUrl = "http://localhost:8084/api/v1/addTeam"
+        axios.post(teamAddUrl, team);
     }
 
     componentDidMount() {
