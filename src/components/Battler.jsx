@@ -6,8 +6,6 @@ import MoveBar from './MoveBar';
 import SwitchingCard from './SwitchingCard';
 import MoveService from '../services/MoveService';
 
-
-
 class Battler extends React.Component {
     constructor(props) {
         super(props);
@@ -27,6 +25,10 @@ class Battler extends React.Component {
             userMove2: {},
             userMove3: {},
             userMove4: {},
+            enemyMove1: {},
+            enemyMove2: {},
+            enemyMove3: {},
+            enemyMove4: {},
             isLoading: true,
             movesLoaded: false,
             switchOccured: true
@@ -39,9 +41,12 @@ class Battler extends React.Component {
         this.cancelSwitching = this.cancelSwitching.bind(this);
         this.selectSet = this.selectSet.bind(this);
         this.getUserMoveData = this.getUserMoveData.bind(this);
+        this.getEnemyMoveData = this.getEnemyMoveData.bind(this);
         this.setMovesLoaded = this.setMovesLoaded.bind(this);
         this.useMove = this.useMove.bind(this);
         this.userUseMove = this.userUseMove.bind(this);
+        this.handleTurnBattle = this.handleTurnBattle.bind(this);
+        this.handleTurnSwitch = this.handleTurnSwitch.bind(this);
     }
 
     initSwitch() {
@@ -61,68 +66,41 @@ class Battler extends React.Component {
         this.setState({ turn: this.state.turn + 1 })
     }
 
-    useMove(move, user, target) {
 
-    }
-
-    getUserMoveData() {
-        const baseUrl = `http://localhost:8084/api/v1/move/`;
-        let url;
-        url = baseUrl + this.state.userCurrentPokemon.move1;
-        axios.get(url).then(res => {
-            console.log(res.data[0]);
-            this.setState({ userMove1: res.data[0] })
-        });
-        url = baseUrl + this.state.userCurrentPokemon.move2;
-        axios.get(url).then(res => {
-            console.log(res.data[0]);
-            this.setState({ userMove2: res.data[0] })
-        });
-        url = baseUrl + this.state.userCurrentPokemon.move3;
-        axios.get(url).then(res => {
-            console.log(res.data[0]);
-            this.setState({ userMove3: res.data[0] })
-        });
-        url = baseUrl + this.state.userCurrentPokemon.move4;
-        axios.get(url).then(res => {
-            console.log(res.data[0]);
-            this.setState({ userMove4: res.data[0] })
-        });
-    }
 
 
     //Damage = ((((2 * Level / 5 + 2) * AttackStat * AttackPower / DefenseStat) / 50) + 2) * STAB * Weakness/Resistance * RandomNumber / 100 for later
     calculateDamage(user, move, target) {
-        console.log(user)
         let attackStat, defenseStat;
         let stab = 1
         //stab = Same type attack bonus
         if (move.type === user.type1.toLowerCase()) {
             stab = 1.5
         }
-        else if (user.hasOwnProperty("type2") === true) {
+        else if (user.hasOwnProperty("type2") === true && user.type2 !== null) {
             if (move.type === user.type2.toLowerCase()) {
                 stab = 1.5
             }
         }
 
         //get the damage for type matchups
+
         let typeDmgMultiplier = MoveService.getTypeMultiplier(move.type, target.type1)
         if (target.hasOwnProperty("type2") === true && target.type2 !== null) {
             typeDmgMultiplier = typeDmgMultiplier * MoveService.getTypeMultiplier(move.type, target.type2)
         }
-        console.log("done with typeDmg: " + typeDmgMultiplier)
+
         //random num between 85 and 100
         let RandomNumber = Math.floor(Math.random() * 16) + 85
         if (move.damage_class.toLowerCase() === "physical") {
             attackStat = user.attack;
             defenseStat = target.defense;
-            console.log("physcial move")
+
         }
         else if (move.damage_class.toLowerCase() === "special") {
             attackStat = user.spAttack;
             defenseStat = target.spDefense;
-            console.log("special move")
+
         }
         else {
             alert("this move has not been implemented yet.")
@@ -130,32 +108,78 @@ class Battler extends React.Component {
             defenseStat = 1;
         }
 
-        return ((((2 * 100 / 5 + 2) * attackStat * move.power / defenseStat) / 50) + 2) * stab * typeDmgMultiplier * RandomNumber / 100;
+        return Math.floor(((((2 * 100 / 5 + 2) * attackStat * move.power / defenseStat) / 50) + 2) * stab * typeDmgMultiplier * RandomNumber / 100);
     }
 
     userUseMove(slot) {
         switch (slot) {
             case 1:
-                console.log(this.calculateDamage(this.state.userCurrentPokemon, this.state.userMove1, this.state.enemyCurrentPokemon))
+                this.handleTurnBattle(this.calculateDamage(this.state.userCurrentPokemon, this.state.userMove1, this.state.enemyCurrentPokemon))
                 break;
             case 2:
-                console.log(this.calculateDamage(this.state.userCurrentPokemon, this.state.userMove2, this.state.enemyCurrentPokemon))
+                this.handleTurnBattle(this.calculateDamage(this.state.userCurrentPokemon, this.state.userMove2, this.state.enemyCurrentPokemon))
                 break;
             case 3:
-                console.log(this.calculateDamage(this.state.userCurrentPokemon, this.state.userMove3, this.state.enemyCurrentPokemon))
+                this.handleTurnBattle(this.calculateDamage(this.state.userCurrentPokemon, this.state.userMove3, this.state.enemyCurrentPokemon))
                 break;
             case 4:
-                console.log(this.calculateDamage(this.state.userCurrentPokemon, this.state.userMove3, this.state.enemyCurrentPokemon))
+                this.handleTurnBattle(this.calculateDamage(this.state.userCurrentPokemon, this.state.userMove3, this.state.enemyCurrentPokemon))
+                break;
+            default:
                 break;
         }
-        console.log(slot)
+
     }
 
     useMove(isUserTarget, damage) {
-        if (isUserTarget) {
+
+        if (isUserTarget === true) {
+            let pokemon = this.state.userCurrentPokemon;
+            if (pokemon.hasOwnProperty("startingHp") !== true) {
+                pokemon.startingHp = pokemon.hp;
+                pokemon.hp = parseInt(pokemon.hp) - damage;
+                this.setState({ userCurrentPokemon: pokemon })
+            }
+            else {
+                pokemon.hp = pokemon.hp - damage;
+                if (pokemon.hp > 0) {
+                    this.setState({ userCurrentPokemon: pokemon })
+                }
+                else {
+                    this.setState({ userCurrentPokemon: {} })
+                    this.setState({ switching: true })
+                }
+            }
+
+
+
+
 
         }
         else {
+            let pokemon = this.state.enemyCurrentPokemon;
+            if (pokemon.hasOwnProperty("startingHp") !== true) {
+                pokemon.startingHp = pokemon.hp;
+                pokemon.hp = parseInt(pokemon.hp) - damage;
+                this.setState({ enemyCurrentPokemon: pokemon })
+            }
+            else {
+                pokemon.hp = pokemon.hp - damage;
+                if (pokemon.hp > 0) {
+                    this.setState({ enemyCurrentPokemon: pokemon })
+                }
+                else {
+                    this.setState({ enemyCurrentPokemon: {} })
+                    let cynthPoke = Math.floor(Math.random() * (this.state.enemyPokemon.length));
+                    this.setEnemyCurrentPokemon(cynthPoke);
+
+                }
+
+            }
+
+
+
+
 
         }
     }
@@ -164,12 +188,76 @@ class Battler extends React.Component {
 
 
 
+    cynthSelectMove() {
+        console.log("inside cynth")
+        //inside this function user refers to the program user, not the move user
+        const userPoke = this.state.userCurrentPokemon;
+        const enemyPoke = this.state.enemyCurrentPokemon;
+        const moves = [this.state.enemyMove1, this.state.enemyMove2, this.state.enemyMove3, this.state.enemyMove4]
+        //check if slower
+        //if slower, check for priority moves, if a move has priority check if will knock out, if it will, use that move
+        //if faster, priority move(s) wont kill, or no priority moves, use highest damage
+        let highestDamage = 0;
+        let highestDamageMove = 0;
+        //checks if slower
+        if (userPoke.speed > enemyPoke.speed) {
+            for (let i = 0; i < moves.length; i++) {
+                //if move has priority
+                if (moves[i].priority > 0) {
+                    //if damage is greater than the user's hp it will kill, use it
+                    let damage = this.calculateDamage(enemyPoke, moves[i], userPoke)
+                    if (damage > userPoke.hp) {
+                        console.log(moves[i])
+                        this.useMove(true, damage)
+                        return;
+                    }
+                }
+            }
+        }
+        //slower, or no priority moves would kill
+        //loop thru moves, calc damage for each, use the highest damage
+        for (let i = 0; i < moves.length; i++) {
+            let damage = this.calculateDamage(enemyPoke, moves[i], userPoke)
+            //if damage is higher than highest recorded, replace that value, store the move slot
+            if (damage > highestDamage) {
+                highestDamage = damage;
+                highestDamageMove = i;
+            }
+        }
+        console.log("done with calcs highest move is " + moves[highestDamageMove].name + " with " + highestDamage)
+        this.useMove(true, highestDamage)
 
-    handleTurn() {
+
+
+    }
+
+
+
+    handleTurnSwitch() {
         this.setState({ isLoading: true })
         if (this.state.switching === true) {
             this.setState({ switching: false })
         }
+        this.setState({ turn: this.state.turn + 1 })
+    }
+
+    handleTurnBattle(damage) {
+        this.setState({ isLoading: true })
+        if (this.state.enemyCurrentPokemon.speed > this.state.userCurrentPokemon.speed) {
+            this.cynthSelectMove()
+            console.log(this.state.userCurrentPokemon.hp > 0)
+            if (this.state.userCurrentPokemon.hp > 0) {
+                this.useMove(false, damage)
+            }
+        }
+        else {
+            this.useMove(false, damage)
+            console.log(this.state.enemyCurrentPokemon.hp > 0)
+            if (this.state.enemyCurrentPokemon.hp > 0) {
+                this.cynthSelectMove()
+            }
+        }
+
         this.setState({ turn: this.state.turn + 1 })
     }
 
@@ -186,7 +274,6 @@ class Battler extends React.Component {
 
 
     setUserCurrentPokemon(pkmnSlot) {
-        console.log(pkmnSlot)
         let current = {};
         let newCurrent;
         if (this.state.userCurrentPokemon !== {}) {
@@ -196,7 +283,6 @@ class Battler extends React.Component {
         if (current !== {}) {
             newCurrent = array.splice(pkmnSlot, 1)
             newCurrent = newCurrent[0]
-            array.push(current)
         }
         else {
             console.log("here")
@@ -207,29 +293,94 @@ class Battler extends React.Component {
         this.setState({ userPokemon: array })
         this.setState({ movesLoaded: false })
         this.setState({ switchOccured: true })
-        this.handleTurn();
+        this.getUserMoveData(newCurrent);
+        this.handleTurnSwitch();
     }
+
+    getUserMoveData(pkmn) {
+        const baseUrl = `http://localhost:8084/api/v1/move/`;
+        let url;
+        url = baseUrl + pkmn.move1;
+        axios.get(url).then(res => {
+            console.log(res.data[0]);
+            this.setState({ userMove1: res.data[0] })
+        });
+        url = baseUrl + pkmn.move2;
+        axios.get(url).then(res => {
+            console.log(res.data[0]);
+            this.setState({ userMove2: res.data[0] })
+        });
+        url = baseUrl + pkmn.move3;
+        axios.get(url).then(res => {
+            console.log(res.data[0]);
+            this.setState({ userMove3: res.data[0] })
+        });
+        url = baseUrl + pkmn.move4;
+        axios.get(url).then(res => {
+            console.log(res.data[0]);
+            this.setState({ userMove4: res.data[0] })
+        });
+    }
+
+
+
 
 
     setEnemyCurrentPokemon(pkmnSlot) {
         let current = {};
         let newCurrent;
-        if (this.state.enemyCurrentPokemon !== {}) {
-            current = this.state.enemyCurrentPokemon;
-        }
-        let array = this.state.enemyPokemon;
-        if (current !== {}) {
-            newCurrent = array.splice(pkmnSlot, 1)
-            newCurrent = newCurrent[0]
+        if (this.state.enemyPokemon.length !== 0) {
+            if (this.state.enemyCurrentPokemon !== {}) {
+                current = this.state.enemyCurrentPokemon;
+            }
+            let array = this.state.enemyPokemon;
+            if (current !== {}) {
+                newCurrent = array.splice(pkmnSlot, 1)
+                newCurrent = newCurrent[0]
+            }
+            else {
+                console.log("here")
+                newCurrent = array.splice(pkmnSlot, 1, current)
+            }
+            this.setState({ enemyCurrentPokemon: newCurrent })
+            this.setState({ enemyPokemon: array })
+            this.getEnemyMoveData(newCurrent)
         }
         else {
-            console.log("here")
-            newCurrent = array.splice(pkmnSlot, 1, current)
+            alert("Congratulations! You won against cynthia. Your team will now be added to the hall of fame. Think you can do it with another team?")
+            this.props.handleVictory();
+            console.log("you win")
         }
-        this.setState({ enemyCurrentPokemon: newCurrent })
-        this.setState({ enemyPokemon: array })
-
     }
+
+
+    getEnemyMoveData(pkmn) {
+
+        const baseUrl = `http://localhost:8084/api/v1/move/`;
+        let url;
+        url = baseUrl + pkmn.move1;
+        axios.get(url).then(res => {
+
+            console.log(res.data[0]);
+            this.setState({ enemyMove1: res.data[0] })
+        });
+        url = baseUrl + pkmn.move2;
+        axios.get(url).then(res => {
+            console.log(res.data[0]);
+            this.setState({ enemyMove2: res.data[0] })
+        });
+        url = baseUrl + pkmn.move3;
+        axios.get(url).then(res => {
+            console.log(res.data[0]);
+            this.setState({ enemyMove3: res.data[0] })
+        });
+        url = baseUrl + pkmn.move4;
+        axios.get(url).then(res => {
+            console.log(res.data[0]);
+            this.setState({ enemyMove4: res.data[0] })
+        });
+    }
+
 
 
 
@@ -272,6 +423,22 @@ class Battler extends React.Component {
 
     componentDidUpdate(prevProps, prevState) {
 
+
+
+
+        if (this.state.userCurrentPokemon.hasOwnProperty("name") === false && this.state.userPokemon.length === 0 && this.state.winner === null) {
+            this.setState({ winner: "enemy" })
+            this.props.handleLoss();
+            console.log("you lose")
+        }
+        else if (this.state.winner !== null) {
+
+        }
+
+
+
+
+
         if (this.state.switchOccured === true) {
             this.setState({ switchOccured: false });
         }
@@ -281,8 +448,21 @@ class Battler extends React.Component {
         }
         else if (this.state.isLoading === true) {
             this.setState({ isLoading: false })
-            this.getUserMoveData();
         }
+
+        if (this.state.userCurrentPokemon.hp <= 0) {
+            this.setState({ userCurrentPokemon: {} })
+            this.setState({ switching: true })
+            this.setState({ isLoading: true })
+        }
+        else if (this.state.enemyCurrentPokemon.hp <= 0) {
+            this.setState({ enemyCurrentPokemon: {} })
+            let cynthPoke = Math.floor(Math.random() * (this.state.enemyPokemon.length));
+            this.setEnemyCurrentPokemon(cynthPoke);
+            this.setState({ isLoading: true })
+        }
+
+
 
 
     }
@@ -297,6 +477,7 @@ class Battler extends React.Component {
         else {
             return (
                 <div>
+                    <h1 onClick={this.showState}>Show state</h1>
                     <BattleCard name={this.state.enemyTeam.name} pokemon={this.state.enemyCurrentPokemon} back={false} className='enemy' style={{ justifyContent: "flex-end" }} />
                     <BattleMessages messages={this.state.messages} />
                     {this.state.switching ? <SwitchingCard pokemon={this.state.userPokemon} cancelSwitching={this.cancelSwitching} setCurrentPokemon={this.setUserCurrentPokemon} name={this.state.userTeam.name} clickHandler={this.selectSet} /> :

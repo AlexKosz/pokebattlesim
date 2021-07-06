@@ -2,7 +2,7 @@ import axios from 'axios';
 import React from 'react';
 import TrainerCard from './TrainerCard';
 import Battler from './Battler';
-
+import { Redirect } from 'react-router'
 
 
 class Battle extends React.Component {
@@ -16,10 +16,15 @@ class Battle extends React.Component {
             enemyTeam: {},
             enemyPokemon: [],
             loading: true,
-            battleStarted: false
+            battleStarted: false,
+            winner: null,
+            isLoading: true,
+            victorious: false
         };
         this.beginBattle = this.beginBattle.bind(this);
         this.getCynthia = this.getCynthia.bind(this);
+        this.handleLoss = this.handleLoss.bind(this);
+        this.handleVictory = this.handleVictory.bind(this);
 
 
     }
@@ -52,33 +57,60 @@ class Battle extends React.Component {
         this.setState({ battleStarted: true })
     }
 
-    isLoading() {
-        if (this.state.userPokemon.length === 0) return true;
-        if (this.state.userTeam === {}) return true;
-        if (this.state.enemyPokemon.length === 0) return true;
-        if (this.state.enemyTeam === {}) return true;
-        return false;
+    handleLoss() {
+        alert("You lost... try again?")
+        this.getCynthia();
+        this.getNewestTeam();
+        this.setState({ battleStarted: false })
+        this.setState({ isLoading: true })
+    }
 
+    handleVictory() {
+        console.log("teststing");
+        this.setState({ victorious: true })
+        // let setVictoriousUrl = `http://localhost:8084/api/v1/team/victorious/${this.state.userTeamId}`
+        // axios.post(setVictoriousUrl).then(res => {
+
+        // });
     }
 
     componentDidMount() {
-        this.getNewestTeam();
+        if (this.state.userTeamId === 0) {
+            this.getNewestTeam();
+        }
+        else {
+            let TeamUrl = `http://localhost:8084/api/v1/team/${this.state.userTeamId}`
+            axios.get(TeamUrl).then(res => {
+                this.setState({ userTeam: res.data })
+            });
+        }
         this.getCynthia();
     }
 
+    componentDidUpdate() {
+        if (this.state.userPokemon.length !== 0 &&
+            this.state.userTeam !== {} &&
+            this.state.enemyPokemon.length !== 0 &&
+            this.state.enemyTeam !== {} &&
+            this.state.isLoading === true) {
+            this.setState({ isLoading: false })
+        }
+    }
+
     render() {
-        if (this.isLoading()) {
+        if (this.state.victorious === true) {
+            return <Redirect to="/" noThrow />
+        }
+
+        if (this.state.isLoading === true) {
             return (
                 <div className="loading">
                     <h1>Loading...</h1>
                 </div>
             );
         }
-
-
-
         else {
-            if (!this.state.battleStarted) {
+            if (this.state.battleStarted !== true) {
                 return (
                     <div className="loaded">
                         <div className="trainerCardBattleUser">
@@ -96,7 +128,7 @@ class Battle extends React.Component {
             else {
                 return (
                     <div className="battle">
-                        <Battler userTeam={this.state.userTeam} userPokemon={this.state.userPokemon} enemyTeam={this.state.enemyTeam} enemyPokemon={this.state.enemyPokemon} />
+                        <Battler userTeam={this.state.userTeam} userPokemon={this.state.userPokemon} enemyTeam={this.state.enemyTeam} enemyPokemon={this.state.enemyPokemon} handleLoss={this.handleLoss} handleVictory={this.handleVictory} />
                     </div>
                 );
             }

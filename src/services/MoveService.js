@@ -116,7 +116,7 @@ class MoveService {
                     case "water":
                         return 0.5;
                     case "grass":
-                        return 0.5;
+                        return 2;
                     case "ice":
                         return 0.5;
                     case "ground":
